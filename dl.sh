@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
- set -x
 
 baseurl=""
 next_frag=""
@@ -121,4 +120,5 @@ echo "Folder: $ts_folder"
 [[ -z "$skip_dl" ]] && dl
 combine
 transcode
+mv *.m3u8 $ts_folder
 
