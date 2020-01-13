@@ -2,6 +2,7 @@
 
 baseurl=""
 next_frag=""
+dl_m3u8=""
 
 opts() {
 while test $# -gt 0; do
@@ -9,6 +10,16 @@ while test $# -gt 0; do
     -h|--help)
       echo "help yourself"
       exit 0
+      ;;
+    -m)
+      shift
+      if test $# -gt 0; then
+        manifest_link=$1
+      else
+        echo "wot. gimme m3u link."
+        exit 1
+      fi
+      shift
       ;;
     -d)
       shift
@@ -53,8 +64,8 @@ done
 
 
 clean() {
-  if [[ $(ls $ts_folder | wc -l) -lt 3 ]]; then
-    echo "cleaning... $ts_folder"
+  if [[ $(ls $ts_folder 2>/dev/null | wc -l) -lt 3 ]]; then
+    echo "cleaning dir: $ts_folder"
     rm -rf $ts_folder
   fi
 }
@@ -104,7 +115,15 @@ dl() {
   done
 }
 
+dl_manifest() {
+  curl -s $manifest_link -o manny.m3u8
+  if [[ -z "$baseurl" ]]; then
+    baseurl=$(dirname $manifest_link)
+  fi
+}
+
 opts $@
+[[ -n "$manifest_link" ]] && dl_manifest
 if [[ -z "$baseurl" ]]; then
   echo "gimme baseurl"
   exit 1
