@@ -5,60 +5,60 @@ next_frag=""
 dl_m3u8=""
 
 opts() {
-while test $# -gt 0; do
-  case "$1" in
-    -h|--help)
-      echo "help yourself"
-      exit 0
-      ;;
-    -m)
-      shift
-      if test $# -gt 0; then
-        manifest_link=$1
-      else
-        echo "wot. gimme m3u link."
-        exit 1
-      fi
-      shift
-      ;;
-    -d)
-      shift
-      if test $# -gt 0; then
-        ts_folder=$1
-      else
-          echo "gimme folder pls"
+  while test $# -gt 0; do
+    case "$1" in
+      -h|--help)
+        echo "help yourself"
+        exit 0
+        ;;
+      -m)
+        shift
+        if test $# -gt 0; then
+          manifest_link=$1
+        else
+          echo "wot. gimme m3u link."
           exit 1
-      fi
-      shift
-      ;;
-    -c)
-      shift
-      if test $# -gt 0; then
-        next_frag=$1
-      else
-        echo "you owe me a frag number"
-        exit 1
-      fi
-      shift
-      ;;
-    -s)
-      shift
-      skip_dl="true"
-      ;;
-    -u)
-      shift
-      if test $# -gt 0; then
-        baseurl=$1
-      else
-        echo "where the baseurl?"
-      fi
-      shift
-      ;;
-    *)
-      break
-      ;;
-  esac
-done
+        fi
+        shift
+        ;;
+      -d)
+        shift
+        if test $# -gt 0; then
+          ts_folder=$1
+        else
+            echo "gimme folder pls"
+            exit 1
+        fi
+        shift
+        ;;
+      -c)
+        shift
+        if test $# -gt 0; then
+          next_frag=$1
+        else
+          echo "you owe me a frag number"
+          exit 1
+        fi
+        shift
+        ;;
+      -s)
+        shift
+        skip_dl="true"
+        ;;
+      -u)
+        shift
+        if test $# -gt 0; then
+          baseurl=$1
+        else
+          echo "where the baseurl?"
+        fi
+        shift
+        ;;
+      *)
+        break
+        ;;
+    esac
+  done
 }
 
 
