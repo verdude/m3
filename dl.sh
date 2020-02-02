@@ -3,6 +3,7 @@
 baseurl=""
 next_frag=""
 dl_m3u8=""
+naming=""
 
 opts() {
   while test $# -gt 0; do
@@ -61,7 +62,17 @@ opts() {
   done
 }
 
-
+naming() {
+  name=$1
+  if [[ "$name" =~ Frag-[0-9]*-v1-a1 ]]; then
+    naming="Frag"
+  elif [[ "$name" =~ part[0-9]*.ts ]]; then
+    naming="part"
+  else
+    echo "Unknown naming convention: $name"
+    exit 1
+  fi
+}
 
 clean() {
   if [[ $(ls $ts_folder 2>/dev/null | wc -l) -lt 3 ]]; then
@@ -78,6 +89,8 @@ combine() {
     cat $ts_folder/$line >> $ts_folder/combined.ts;
     if [ $? -ne 0 ]; then
       echo "Failed to combine file: $line"
+    else
+      echo combine: $line
     fi
   done < $tslist_file
 }
@@ -97,10 +110,7 @@ dl() {
       exit 1
     fi
 
-    if [[ ! "$name" =~ Frag-[0-9]*-v1-a1 ]]; then
-      echo "Unknown naming convention: $name"
-      exit 1
-    fi
+    naming $name
 
     curl -s $baseurl/$url -o $ts_folder/$name
     exit_code=$?
