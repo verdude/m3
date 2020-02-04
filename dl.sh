@@ -6,6 +6,7 @@ baseurl=""
 next_frag=""
 dl_m3u8=""
 naming=""
+manifest="$(find . -type f -name "*.m3u8" | head -1)"
 
 opts() {
   while test $# -gt 0; do
@@ -136,11 +137,11 @@ dl_manifest() {
     echo "dir doesn't exist: $ts_folder"
     exit 1
   fi
-  curl -s $manifest_link -o $ts_folder/manny.m3u8
+  manifest="$ts_folder/manny.m3u8"
+  curl -s $manifest_link -o "$manifest"
   if [[ -z "$baseurl" ]]; then
     baseurl=$(dirname $manifest_link)
   fi
-  urls=$(cat "$ts_folder/manny.m3u8" | grep -v "^#")
 }
 
 opts $@
@@ -156,6 +157,11 @@ echo "Folder: $ts_folder"
 if [[ -z "$baseurl" ]]; then
   echo "gimme baseurl"
   exit 1
+fi
+if [[ -n "$manifest" ]]; then
+  urls=$(cat "$manifest" | grep -v "^#")
+else
+  echo "No Manifest found."
 fi
 
 if [[ -z "$skip_dl" ]]; then
