@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 baseurl=""
 next_frag=""
 dl_m3u8=""
@@ -85,6 +87,10 @@ trap clean EXIT
 combine() {
   echo
   echo "Attempting to combine..."
+  if [[ ! -f "$tslist_file" ]]; then
+    echo "no $tslist_file"
+    exit 1
+  fi
   while read line; do
     cat $ts_folder/$line >> $ts_folder/combined.ts;
     if [ $? -ne 0 ]; then
@@ -126,7 +132,7 @@ dl() {
 }
 
 dl_manifest() {
-  curl -s $manifest_link -o manny.m3u8
+  curl -s $manifest_link -o $ts_folder/manny.m3u8
   if [[ -z "$baseurl" ]]; then
     baseurl=$(dirname $manifest_link)
   fi
@@ -141,12 +147,16 @@ if [[ -z "$skip_dl" ]] && [[ -z "$next_frag" ]]; then
   :> $tslist_file
 fi
 echo "Folder: $ts_folder"
+
 [[ -n "$manifest_link" ]] && dl_manifest
 if [[ -z "$baseurl" ]]; then
   echo "gimme baseurl"
   exit 1
 fi
-[[ -z "$skip_dl" ]] && dl
+
+if [[ -z "$skip_dl" ]]; then
+  dl
+fi
+
 combine
 transcode
-
