@@ -110,6 +110,7 @@ transcode() {
 }
 
 dl() {
+  set -x
   for url in $urls; do
     name=$(basename $url)
     if [ -z "$name" ]; then
@@ -149,17 +150,28 @@ opts $@
 tslist_file="$ts_folder/tslist.txt"
 mkdir -p $ts_folder
 if [[ -z "$skip_dl" ]] && [[ -z "$next_frag" ]]; then
+  echo truncating tslist file..... JK LOL
+  exit 1
   :> $tslist_file
 fi
 echo "Folder: $ts_folder"
 
-[[ -n "$manifest_link" ]] && dl_manifest
-if [[ -z "$baseurl" ]]; then
-  echo "gimme baseurl"
-  exit 1
+if [[ -z "$next_frag" ]]; then
+  [[ -n "$manifest_link" ]] && dl_manifest
+  if [[ -z "$baseurl" ]]; then
+    echo "gimme baseurl"
+    exit 1
+  fi
+else
+  manifest="$(find $ts_folder -type f -name '*.m3u8' | head -1)"
 fi
+
 if [[ -n "$manifest" ]]; then
-  urls=$(cat "$manifest" | grep -v "^#")
+  if [[ -n "$next_frag" ]]; then
+    urls=$(cat "$manifest" | grep -v "^#" | tail -n +$next_frag)
+  else
+    urls=$(cat "$manifest" | grep -v "^#")
+  fi
 else
   echo "No Manifest found."
 fi
