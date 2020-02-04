@@ -133,11 +133,6 @@ dl_manifest() {
 }
 
 opts $@
-[[ -n "$manifest_link" ]] && dl_manifest
-if [[ -z "$baseurl" ]]; then
-  echo "gimme baseurl"
-  exit 1
-fi
 urls=$(cat *.m3u8 | grep -v "^#")
 [[ -z "$ts_folder" ]] && ts_folder=$(openssl rand -hex 10)
 tslist_file="$ts_folder/tslist.txt"
@@ -146,8 +141,12 @@ if [[ -z "$skip_dl" ]] && [[ -z "$next_frag" ]]; then
   :> $tslist_file
 fi
 echo "Folder: $ts_folder"
+[[ -n "$manifest_link" ]] && dl_manifest
+if [[ -z "$baseurl" ]]; then
+  echo "gimme baseurl"
+  exit 1
+fi
 [[ -z "$skip_dl" ]] && dl
 combine
 transcode
-mv *.m3u8 $ts_folder
 
