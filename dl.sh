@@ -8,6 +8,14 @@ dl_m3u8=""
 naming=""
 manifest="$(find . -type f -name "*.m3u8" | head -1)"
 
+pushd () {
+  pushd $1 &>/dev/null
+}
+
+popd () {
+  popd $1 &>/dev/null
+}
+
 opts() {
   while test $# -gt 0; do
     case "$1" in
@@ -78,8 +86,11 @@ naming() {
 }
 
 clean() {
+  popd
   if [[ $(ls $ts_folder 2>/dev/null | wc -l) -lt 3 ]]; then
     echo "cleaning dir: $ts_folder"
+    echo orrrr nooooot...
+    exit 1
     rm -rf $ts_folder
   fi
 }
@@ -172,6 +183,7 @@ if [[ -n "$manifest" ]]; then
   else
     urls=$(cat "$manifest" | grep -v "^#")
   fi
+  echo "#baseurl# $baseurl" >> $manifest
 else
   echo "No Manifest found."
 fi
