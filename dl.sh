@@ -132,14 +132,18 @@ dl() {
 }
 
 dl_manifest() {
+  if [[ ! -d "$ts_folder" ]]; then
+    echo "dir doesn't exist: $ts_folder"
+    exit 1
+  fi
   curl -s $manifest_link -o $ts_folder/manny.m3u8
   if [[ -z "$baseurl" ]]; then
     baseurl=$(dirname $manifest_link)
   fi
+  urls=$(cat "$ts_folder/manny.m3u8" | grep -v "^#")
 }
 
 opts $@
-urls=$(cat *.m3u8 | grep -v "^#")
 [[ -z "$ts_folder" ]] && ts_folder=$(openssl rand -hex 10)
 tslist_file="$ts_folder/tslist.txt"
 mkdir -p $ts_folder
