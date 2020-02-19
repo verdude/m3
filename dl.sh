@@ -161,8 +161,6 @@ opts $@
 tslist_file="$ts_folder/tslist.txt"
 mkdir -p $ts_folder
 if [[ -z "$skip_dl" ]] && [[ -z "$next_frag" ]]; then
-  echo truncating tslist file..... JK LOL
-  exit 1
   :> $tslist_file
 fi
 echo "Folder: $ts_folder"
