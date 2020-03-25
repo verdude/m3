@@ -38,8 +38,8 @@ opts() {
         if test $# -gt 0; then
           ts_folder=$1
         else
-            echo "gimme folder pls"
-            exit 1
+          echo "gimme folder pls"
+          exit 1
         fi
         shift
         ;;
