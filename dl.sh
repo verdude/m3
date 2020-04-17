@@ -121,7 +121,6 @@ transcode() {
 }
 
 dl() {
-  set -x
   for url in $urls; do
     name=$(basename $url)
     if [ -z "$name" ]; then
