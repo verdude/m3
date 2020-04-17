@@ -8,14 +8,6 @@ dl_m3u8=""
 naming=""
 manifest="$(find . -type f -name "*.m3u8" | head -1)"
 
-pushd () {
-  pushd $1 &>/dev/null
-}
-
-popd () {
-  popd $1 &>/dev/null
-}
-
 opts() {
   while test $# -gt 0; do
     case "$1" in
@@ -85,16 +77,14 @@ naming() {
   fi
 }
 
-clean() {
-  popd
+cleaners() {
+  set +e
   if [[ $(ls $ts_folder 2>/dev/null | wc -l) -lt 3 ]]; then
     echo "cleaning dir: $ts_folder"
-    echo orrrr nooooot...
-    exit 1
-    rm -rf $ts_folder
+    rm -rif $ts_folder
   fi
 }
-trap clean EXIT
+trap cleaners EXIT
 
 combine() {
   echo
@@ -108,16 +98,16 @@ combine() {
     if [ $? -ne 0 ]; then
       echo "Failed to combine file: $line"
     else
-      echo combine: $line
+      printf "+"
     fi
   done < $tslist_file
+  echo
 }
 
 transcode() {
-  echo "Attemping to transcode..."
-  pushd $ts_folder
+  echo "Attempting to transcode..."
+  cd $ts_folder
   ffmpeg -i combined.ts -c copy movie.mp4
-  popd
 }
 
 dl() {
@@ -155,14 +145,18 @@ dl_manifest() {
   fi
 }
 
+setupdir() {
+  [[ -z "$ts_folder" ]] && ts_folder=$(openssl rand -hex 10)
+  tslist_file="$ts_folder/tslist.txt"
+  mkdir -p $ts_folder
+  if [[ -z "$skip_dl" ]] && [[ -z "$next_frag" ]]; then
+    :> $tslist_file
+  fi
+  echo "Folder: $ts_folder"
+}
+
 opts $@
-[[ -z "$ts_folder" ]] && ts_folder=$(openssl rand -hex 10)
-tslist_file="$ts_folder/tslist.txt"
-mkdir -p $ts_folder
-if [[ -z "$skip_dl" ]] && [[ -z "$next_frag" ]]; then
-  :> $tslist_file
-fi
-echo "Folder: $ts_folder"
+setupdir
 
 if [[ -z "$next_frag" ]]; then
   [[ -n "$manifest_link" ]] && dl_manifest
@@ -183,6 +177,7 @@ if [[ -n "$manifest" ]]; then
   echo "#baseurl# $baseurl" >> $manifest
 else
   echo "No Manifest found."
+  exit 1
 fi
 
 if [[ -z "$skip_dl" ]]; then
