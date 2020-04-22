@@ -160,7 +160,7 @@ setupdir
 
 if [[ -z "$next_frag" ]]; then
   [[ -n "$manifest_link" ]] && dl_manifest
-  if [[ -z "$baseurl" ]]; then
+  if [[ -z "$baseurl" ]] && [[ -z "$skip_dl" ]]; then
     echo "gimme baseurl"
     exit 1
   fi
