@@ -107,7 +107,7 @@ combine() {
 transcode() {
   echo "Attempting to transcode..."
   cd $ts_folder
-  ffmpeg -i combined.ts -c copy movie.mp4
+  ffmpeg -i combined.ts -c copy $ts_folder.mp4
 }
 
 dl() {
