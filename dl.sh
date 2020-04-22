@@ -186,3 +186,4 @@ fi
 
 combine
 transcode
+trap - EXIT
