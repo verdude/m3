@@ -128,7 +128,12 @@ dl() {
     set +e
     curl -s $baseurl/$url -o $ts_folder/$name
     exit_code=$?
-    printf .
+    ists=$(file $ts_folder/$name | grep -i "transport stream")
+    if [[ -z "$ists" ]]; then
+      exit_code=1
+    else
+      printf .
+    fi
     set -e
 
     if [ $exit_code -ne 0 ]; then
@@ -196,8 +201,10 @@ if [[ -f "$manifest" ]]; then
   else
     urls=$(cat "$manifest" | grep -v "^#")
   fi
+  set +e
   # TODO: don't echo if it's already there
   toadd=$(cat $manifest | grep "#baseurl# ")
+  set -e
   if [[ -z "$toadd" ]]; then
     echo "#baseurl# $baseurl" >> $manifest
   fi
