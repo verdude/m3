@@ -7,6 +7,7 @@ next_frag=""
 dl_m3u8=""
 naming=""
 manifest="$(find . -type f -name "*.m3u8" | head -1)"
+EMPTY=""
 
 opts() {
   while test $# -gt 0; do
@@ -57,6 +58,10 @@ opts() {
           echo "where the baseurl?"
         fi
         shift
+        ;;
+      -e)
+        shift
+        EMPTY="true"
         ;;
       *)
         break
@@ -120,14 +125,16 @@ dl() {
 
     naming $name
 
+    set +e
     curl -s $baseurl/$url -o $ts_folder/$name
     exit_code=$?
     printf .
+    set -e
 
     if [ $exit_code -ne 0 ]; then
       echo "Failed with code $exit_code"
       printf "Command: [curl -s $baseurl/$url -o $ts_folder/$name]"
-        exit $exit_code
+      exit $exit_code
     fi
     echo $name >> $tslist_file
   done
@@ -156,6 +163,18 @@ setupdir() {
 }
 
 opts $@
+
+if [[ -n "$EMPTY" ]]; then
+  if [[ -n "$ts_folder" ]]; then
+    rm -f $ts_folder/*.mp4
+    rm -f $ts_folder/combined.ts
+  else
+    echo "need dir for empty"
+    exit 1
+  fi
+  exit
+fi
+
 setupdir
 
 if [[ -z "$next_frag" ]]; then
@@ -165,16 +184,23 @@ if [[ -z "$next_frag" ]]; then
     exit 1
   fi
 else
-  manifest="$(find $ts_folder -type f -name '*.m3u8' | head -1)"
+  manifest="$ts_folder/manny.m3u8"
+  if [[ -z "$baseurl" ]]; then
+    baseurl=$(cat $ts_folder/manny.m3u8 | grep '#baseurl#' | cut -d' ' -f2)
+  fi
 fi
 
-if [[ -n "$manifest" ]]; then
+if [[ -f "$manifest" ]]; then
   if [[ -n "$next_frag" ]]; then
     urls=$(cat "$manifest" | grep -v "^#" | tail -n +$next_frag)
   else
     urls=$(cat "$manifest" | grep -v "^#")
   fi
-  echo "#baseurl# $baseurl" >> $manifest
+  # TODO: don't echo if it's already there
+  toadd=$(cat $manifest | grep "#baseurl# ")
+  if [[ -z "$toadd" ]]; then
+    echo "#baseurl# $baseurl" >> $manifest
+  fi
 else
   echo "No Manifest found."
   exit 1
